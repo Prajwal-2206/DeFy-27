@@ -1,0 +1,21 @@
+# secrets - in place from commit #1 (security.md §3)
+.env
+.env.*
+!.env.example
+
+# deps / build
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# platform
+.vercel/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

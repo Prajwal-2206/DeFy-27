@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DEFY'27</title>
+<meta name="description" content="DeFy'27 - the Web3 hackathon by The DAO Community, VIT Chennai. January 8 to 10, 2027. Registrations opening soon." />
+<meta name="theme-color" content="#000000" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="DEFY'27 - Defy The Limits" />
+<meta property="og:description" content="The Web3 hackathon by The DAO Community, VIT Chennai. January 8 to 10, 2027." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DEFY'27 - teaser page
+   Design tokens carried over verbatim from DeFy'26.
+   See DEFY27-BUILD-SPEC.md §2 before changing any colour.
+   ══════════════════════════════════════════════════════════════ */
+
+@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+:root {
+  /* surfaces - true black, not dark grey */
+  --bg:           #000000;
+  --card:         #0a0a0a;
+  --border:       #222222;
+
+  /* THE Defy green */
+  --neon:         #39ff14;
+  --neon-2:       #a2ff00;  /* acid/lime variant, used for chromatic split */
+  --neon-3:       #66ff33;
+  --deep:         #0d400d;
+
+  --fg:           #ffffff;
+  --muted:        #b0b0b0;
+  --dim:          #6b6b6b;
+
+  --font-display: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --font-mono:    'Bungee', 'Courier New', monospace;
+  --font-body:    'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --gutter: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  /* faint grid - 2% white, sits behind everything */
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 54px 54px;
+}
+
+::selection { background: var(--neon); color: #000; }
+
+/* ─── fixed overlays ─────────────────────────────────────────── */
+
+#net {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* mouse spotlight - reveals the grid as you move */
+.spotlight {
+  position: fixed; inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 30%),
+    rgba(57,255,20,0.10),
+    transparent 70%
+  );
+  transition: background 120ms linear;
+}
+
+/* film grain */
+.noise {
+  position: fixed; inset: -50%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.6s steps(2) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-3%, 2%); }
+  100% { transform: translate(2%, -2%); }
+}
+
+/* CRT scanlines */
+.scanlines {
+  position: fixed; inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.4;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgba(0,0,0,0.28) 2px 4px
+  );
+}
+
+/* vignette */
+.vignette {
+  position: fixed; inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.75) 100%);
+}
+
+/* ─── content shell ──────────────────────────────────────────── */
+
+.shell { position: relative; z-index: 4; }
+
+.wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+/* ─── nav ────────────────────────────────────────────────────── */
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 14px var(--gutter);
+  backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.55);
+  border-bottom: 1px solid rgba(57,255,20,0.14);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3.4vw, 1.6rem);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--fg);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand span { color: var(--neon); text-shadow: 0 0 14px rgba(57,255,20,0.7); }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neon);
+  padding: 7px 13px;
+  border: 1px solid rgba(57,255,20,0.4);
+  border-radius: 999px;
+  background: rgba(57,255,20,0.05);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--neon);
+  box-shadow: 0 0 10px var(--neon);
+  animation: blip 1.6s ease-in-out infinite;
+  flex: none;
+}
+@keyframes blip {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.25; transform: scale(0.7); }
+}
+
+/* ─── hero ───────────────────────────────────────────────────── */
+
+.hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 110px var(--gutter) 70px;
+  position: relative;
+}
+
+.kicker {
+  font-family: var(--font-body);
+  font-size: clamp(0.6rem, 1.9vw, 0.72rem);
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+/* ── the big glitchy wordmark ── */
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 21vw, 17rem);
+  line-height: 0.82;
+  letter-spacing: 0.01em;
+  margin: 0;
+  position: relative;
+  color: var(--fg);
+  text-shadow:
+    0 0 18px rgba(57,255,20,0.55),
+    0 0 46px rgba(57,255,20,0.3),
+    0 0 110px rgba(57,255,20,0.16);
+}
+.title .yr { color: var(--neon); }
+
+/* chromatic split layers */
+.title::before,
+.title::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.title::before {
+  color: var(--neon-2);
+  text-shadow: none;
+  animation: glitch-a 4.2s steps(1) infinite;
+}
+.title::after {
+  color: var(--neon-3);
+  text-shadow: none;
+  animation: glitch-b 3.1s steps(1) infinite;
+}
+@keyframes glitch-a {
+  0%, 92%, 100% { clip-path: inset(100% 0 0 0); transform: none; opacity: 0; }
+  93%  { clip-path: inset(12% 0 68% 0); transform: translate(-5px, 0); opacity: 0.85; }
+  95%  { clip-path: inset(72% 0 14% 0); transform: translate(4px, 0);  opacity: 0.85; }
+  97%  { clip-path: inset(38% 0 44% 0); transform: translate(-3px, 0); opacity: 0.85; }
+}
+@keyframes glitch-b {
+  0%, 90%, 100% { clip-path: inset(100% 0 0 0); transform: none; opacity: 0; }
+  91%  { clip-path: inset(56% 0 28% 0); transform: translate(5px, 0);  opacity: 0.7; }
+  94%  { clip-path: inset(20% 0 62% 0); transform: translate(-4px, 0); opacity: 0.7; }
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 4.2vw, 1.9rem);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 0;
+}
+
+.meta-line {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: 10px 18px;
+  margin-top: 26px;
+  font-family: var(--font-body);
+  font-size: clamp(0.62rem, 2vw, 0.73rem);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.meta-line b { color: var(--neon); font-weight: 600; }
+.meta-sep { color: rgba(57,255,20,0.35); }
+
+/* ─── countdown ──────────────────────────────────────────────── */
+
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 18px);
+  margin: clamp(34px, 7vw, 58px) auto 0;
+  width: 100%;
+  max-width: 680px;
+}
+
+.cd-unit {
+  position: relative;
+  padding: clamp(14px, 3vw, 24px) 6px clamp(10px, 2vw, 16px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(57,255,20,0.05) 0%, rgba(57,255,20,0.02) 100%),
+    var(--card);
+  box-shadow: 0 0 30px rgba(57,255,20,0.1);
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+.cd-unit::after {
+  /* top edge light */
+  content: '';
+  position: absolute; top: 0; left: 18%; right: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon), transparent);
+  opacity: 0.65;
+}
+.cd-unit:hover {
+  border-color: rgba(57,255,20,0.55);
+  box-shadow: 0 0 30px rgba(57,255,20,0.4);
+  transform: translateY(-3px);
+}
+
+.cd-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(1.45rem, 7vw, 3.4rem);
+  line-height: 1;
+  color: var(--neon);
+  text-shadow: 0 0 20px rgba(57,255,20,0.65), 0 0 50px rgba(57,255,20,0.3);
+  font-variant-numeric: tabular-nums;
+}
+.cd-num.tick { animation: tick 0.42s ease-out; }
+@keyframes tick {
+  0%   { transform: translateY(-5px) scale(1.07); filter: brightness(1.9); }
+  100% { transform: none; filter: none; }
+}
+
+.cd-label {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: clamp(0.5rem, 1.7vw, 0.63rem);
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* post-deadline state - DEFY'26 shipped without one and would have gone negative */
+.cd-live {
+  display: none;
+  margin: clamp(34px, 7vw, 58px) auto 0;
+  padding: 26px 30px;
+  border: 1px solid var(--neon);
+  border-radius: 16px;
+  background: rgba(57,255,20,0.07);
+  box-shadow: 0 0 30px rgba(57,255,20,0.4);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 6vw, 2.6rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+body[data-phase="live"]  .countdown { display: none; }
+body[data-phase="live"]  .cd-live   { display: block; }
+
+/* ─── ticker ─────────────────────────────────────────────────── */
+
+.ticker {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  border-block: 1px solid rgba(57,255,20,0.2);
+  background: rgba(57,255,20,0.035);
+  padding: 15px 0;
+  user-select: none;
+}
+.ticker-track {
+  display: flex; flex: none;
+  gap: 34px;
+  padding-right: 34px;
+  animation: slide 26s linear infinite;
+  will-change: transform;
+}
+.ticker:hover .ticker-track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-100%); } }
+
+.ticker-item {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 3vw, 1.4rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 34px;
+}
+.ticker-item::after {
+  content: '✦';
+  color: var(--neon);
+  font-size: 0.7em;
+  text-shadow: 0 0 12px var(--neon);
+}
+
+/* ─── sections ───────────────────────────────────────────────── */
+
+section { padding: clamp(74px, 13vw, 140px) 0; position: relative; }
+
+.sec-head { margin-bottom: clamp(38px, 7vw, 66px); text-align: center; }
+
+.sec-tag {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--font-body);
+  font-size: 0.6rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--neon);
+  margin-bottom: 16px;
+}
+.sec-tag::before,
+.sec-tag::after {
+  content: '';
+  width: 26px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon));
+}
+.sec-tag::after { background: linear-gradient(90deg, var(--neon), transparent); }
+
+.sec-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 10vw, 5.4rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--fg);
+  text-shadow: 0 0 34px rgba(57,255,20,0.22);
+}
+.sec-title em {
+  font-style: normal;
+  color: var(--neon);
+  text-shadow: 0 0 22px rgba(57,255,20,0.6);
+}
+
+.sec-sub {
+  max-width: 54ch;
+  margin: 18px auto 0;
+  font-size: clamp(0.84rem, 2.4vw, 0.97rem);
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ─── track cards ────────────────────────────────────────────── */
+
+.tracks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(16px, 2.6vw, 26px);
+}
+
+.track {
+  --angle: 0deg;
+  position: relative;
+  padding: clamp(26px, 4vw, 40px) clamp(22px, 3.4vw, 34px);
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.45s, border-color 0.45s;
+}
+
+/* rotating conic halo on the border */
+.track::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle),
+    transparent 0%, var(--neon) 8%, transparent 22%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+  animation: spin 4.5s linear infinite;
+  z-index: -1;
+}
+@keyframes spin { to { --angle: 360deg; } }
+
+.track::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(57,255,20,0.07) 0%, rgba(57,255,20,0.01) 60%);
+  opacity: 0;
+  transition: opacity 0.45s;
+  z-index: -1;
+}
+
+.track:hover,
+.track:focus-within {
+  transform: translateY(-8px);
+  border-color: transparent;
+  box-shadow: 0 8px 32px rgba(57,255,20,0.15), 0 0 30px rgba(57,255,20,0.1);
+}
+.track:hover::before, .track:focus-within::before { opacity: 1; }
+.track:hover::after,  .track:focus-within::after  { opacity: 1; }
+
+.track-idx {
+  position: absolute;
+  top: clamp(16px, 2.6vw, 24px);
+  right: clamp(18px, 2.8vw, 28px);
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 5vw, 2.3rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(57,255,20,0.3);
+  transition: -webkit-text-stroke-color 0.4s;
+}
+.track:hover .track-idx { -webkit-text-stroke-color: rgba(57,255,20,0.75); }
+
+.track-ico {
+  width: 54px; height: 54px;
+  display: grid; place-items: center;
+  border-radius: 13px;
+  border: 1px solid rgba(57,255,20,0.3);
+  background: rgba(57,255,20,0.07);
+  color: var(--neon);
+  margin-bottom: 22px;
+  transition: box-shadow 0.4s, transform 0.4s;
+}
+.track-ico svg { width: 25px; height: 25px; }
+.track:hover .track-ico {
+  box-shadow: 0 0 30px rgba(57,255,20,0.4);
+  transform: scale(1.06) rotate(-4deg);
+}
+
+.track h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 5.6vw, 2.3rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  margin: 0 0 12px;
+  color: var(--fg);
+  transition: color 0.35s, text-shadow 0.35s;
+}
+.track:hover h3 {
+  color: var(--neon);
+  text-shadow: 0 0 22px rgba(57,255,20,0.5);
+}
+
+.track p {
+  margin: 0;
+  font-size: 0.87rem;
+  font-weight: 300;
+  line-height: 1.68;
+  color: var(--muted);
+}
+
+.tracks-note {
+  margin: clamp(30px, 5vw, 46px) auto 0;
+  max-width: 46ch;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* ─── sponsors ───────────────────────────────────────────────── */
+
+.marquee {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  padding: 14px 0;
+  /* edge fade, straight from DeFy'26's LogoLoop */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+}
+.marquee-track {
+  display: flex; flex: none;
+  align-items: center;
+  gap: clamp(28px, 5vw, 62px);
+  padding-right: clamp(28px, 5vw, 62px);
+  animation: slide 34s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee + .marquee .marquee-track { animation-duration: 42s; animation-direction: reverse; }
+
+.logo {
+  flex: none;
+  display: grid; place-items: center;
+  /* Fixed box + object-fit. Don't go back to max-height:100% - a percentage
+     max-height doesn't resolve against a centred grid area, so the square
+     logos (MOI, Spider NITT, Phoenix Guild) sized off max-width instead and
+     overflowed the row, getting clipped by the marquee's overflow:hidden. */
+  width: clamp(112px, 24vw, 168px);
+  height: clamp(44px, 9vw, 64px);
+  opacity: 0.45;
+  filter: grayscale(1) brightness(1.7);
+  transition: opacity 0.4s, filter 0.4s, transform 0.4s;
+}
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.logo:hover, .logo:focus-visible {
+  opacity: 1;
+  filter: none;
+  transform: scale(1.09);
+  outline: none;
+}
+
+/* Flex, not grid. auto-fit grid leaves a dead hole when the item count
+   doesn't divide by the column count; flex-grow makes a short last row
+   stretch to fill instead, so there's never a gap at any width. */
+.sponsor-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin-top: clamp(40px, 6vw, 62px);
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.sponsor-cell {
+  flex: 1 1 148px;
+  display: grid; place-items: center;
+  padding: clamp(24px, 4vw, 38px) 18px;
+  background: var(--card);
+  text-decoration: none;
+  position: relative;
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.sponsor-cell img {
+  width: 100%;
+  height: 46px;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: grayscale(1) brightness(1.7);
+  transition: opacity 0.4s, filter 0.4s, transform 0.4s;
+}
+.sponsor-cell:hover {
+  background: #0f1a0f;
+  box-shadow: inset 0 0 30px rgba(57,255,20,0.14);
+  z-index: 1;
+}
+.sponsor-cell:hover img { opacity: 1; filter: none; transform: scale(1.07); }
+.sponsor-cell:focus-visible { outline: 1px solid var(--neon); outline-offset: -1px; }
+
+.sponsor-cell .nm {
+  position: absolute;
+  bottom: 9px; left: 0; right: 0;
+  font-family: var(--font-body);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neon);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.sponsor-cell:hover .nm, .sponsor-cell:focus-visible .nm { opacity: 1; }
+
+.powered {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: clamp(20px, 4vw, 38px);
+  margin-top: clamp(44px, 7vw, 68px);
+}
+.powered-lbl {
+  font-family: var(--font-body);
+  font-size: 0.55rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--dim);
+  width: 100%; text-align: center;
+  margin-bottom: -10px;
+}
+.powered img {
+  height: clamp(20px, 4vw, 27px);
+  width: auto;
+  opacity: 0.45;
+  transition: opacity 0.35s;
+}
+.powered img:hover { opacity: 1; }
+
+/* ─── footer ─────────────────────────────────────────────────── */
+
+footer {
+  border-top: 1px solid rgba(57,255,20,0.16);
+  padding: clamp(46px, 8vw, 74px) 0 34px;
+  text-align: center;
+  position: relative;
+}
+footer::before {
+  content: '';
+  position: absolute; top: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: min(380px, 70%); height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon), transparent);
+  box-shadow: 0 0 18px var(--neon);
+}
+
+.f-mark {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 14vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(57,255,20,0.3);
+}
+
+.f-line {
+  margin: 20px auto 0;
+  max-width: 44ch;
+  font-size: 0.8rem; font-weight: 300;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.socials {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px;
+  margin: 30px 0 26px;
+}
+.socials a {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--muted);
+  transition: color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+.socials a:hover, .socials a:focus-visible {
+  color: var(--neon);
+  border-color: rgba(57,255,20,0.55);
+  box-shadow: 0 0 30px rgba(57,255,20,0.4);
+  transform: translateY(-3px);
+  outline: none;
+}
+.socials svg { width: 17px; height: 17px; }
+
+.copy {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0;
+}
+.copy b { color: var(--muted); font-weight: 500; }
+
+/* ─── scroll reveal ──────────────────────────────────────────── */
+
+.rv {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s cubic-bezier(.2,.8,.2,1), transform 0.8s cubic-bezier(.2,.8,.2,1);
+  transition-delay: var(--d, 0ms);
+}
+.rv.in { opacity: 1; transform: none; }
+
+/* ─── responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .countdown { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 340px; }
+  .scanlines { opacity: 0.22; }
+  nav { padding: 11px var(--gutter); }
+  .pill { font-size: 0.52rem; padding: 6px 10px; letter-spacing: 0.12em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .rv { opacity: 1; transform: none; }
+  .noise { display: none; }
+  .ticker-track, .marquee-track { animation: none; }
+  .title::before, .title::after { display: none; }
+}
+</style>
+</head>
+<body data-phase="pre">
+
+<canvas id="net" aria-hidden="true"></canvas>
+<div class="spotlight" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<nav>
+  <a class="brand" href="#top">DEFY<span>'27</span></a>
+  <span class="pill"><span class="dot"></span>Registrations Opening Soon</span>
+</nav>
+
+<div class="shell">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero" id="top">
+    <p class="kicker">The DAO Community · VIT Chennai presents</p>
+
+    <h1 class="title" data-text="DEFY'27">DEFY<span class="yr">'27</span></h1>
+
+    <p class="tagline">Defy The Limits</p>
+
+    <div class="meta-line">
+      <span><b>08 . 09 . 10 JAN 2027</b></span>
+      <span class="meta-sep">/</span>
+      <span>VIT Chennai</span>
+      <span class="meta-sep">/</span>
+      <span>Web3 Hackathon</span>
+    </div>
+
+    <!-- countdown fills in via JS; '--' is the no-JS / pre-hydration state -->
+    <div class="countdown" id="countdown" aria-live="polite" aria-label="Countdown to DeFy'27">
+      <div class="cd-unit"><span class="cd-num" data-u="d">--</span><span class="cd-label">Days</span></div>
+      <div class="cd-unit"><span class="cd-num" data-u="h">--</span><span class="cd-label">Hours</span></div>
+      <div class="cd-unit"><span class="cd-num" data-u="m">--</span><span class="cd-label">Minutes</span></div>
+      <div class="cd-unit"><span class="cd-num" data-u="s">--</span><span class="cd-label">Seconds</span></div>
+    </div>
+
+    <div class="cd-live">The Hackathon Is Live</div>
+
+  </header>
+
+  <!-- ═══ TICKER ═══ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-item">Code. Create. Conquer.</span>
+      <span class="ticker-item">36 Hours</span>
+      <span class="ticker-item">Defy The Limits</span>
+      <span class="ticker-item">Build On-Chain</span>
+      <span class="ticker-item">January 8 to 10, 2027</span>
+      <span class="ticker-item">VIT Chennai</span>
+    </div>
+    <div class="ticker-track">
+      <span class="ticker-item">Code. Create. Conquer.</span>
+      <span class="ticker-item">36 Hours</span>
+      <span class="ticker-item">Defy The Limits</span>
+      <span class="ticker-item">Build On-Chain</span>
+      <span class="ticker-item">January 8 to 10, 2027</span>
+      <span class="ticker-item">VIT Chennai</span>
+    </div>
+  </div>
+
+  <!-- ═══ TRACKS ═══ -->
+  <!-- PROVISIONAL: these are DeFy'26's three tracks, carried forward as a
+       placeholder. Swap copy once Core confirms '27 tracks. -->
+  <section id="tracks">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-tag">Choose your battleground</span>
+        <h2 class="sec-title">THE <em>TRACKS</em></h2>
+        <p class="sec-sub">Three directions. One weekend. Pick the one you want to break open - or invent a fourth.</p>
+      </div>
+
+      <div class="tracks">
+        <article class="track rv" style="--d:0ms" tabindex="0">
+          <span class="track-idx">01</span>
+          <div class="track-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="8" cy="8" r="6"/>
+              <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+              <path d="M7 6h1v4"/>
+              <path d="m16.71 13.88.7.71-2.82 2.82"/>
+            </svg>
+          </div>
+          <h3>DeFi</h3>
+          <p>Build decentralized financial solutions. Lending, liquidity, derivatives, payments - rewire how value actually moves.</p>
+        </article>
+
+        <article class="track rv" style="--d:110ms" tabindex="0">
+          <span class="track-idx">02</span>
+          <div class="track-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+              <path d="M2 12h20"/>
+            </svg>
+          </div>
+          <h3>Public Goods</h3>
+          <p>Create solutions for the community. Infrastructure, identity, governance, access - the unglamorous things everything else stands on.</p>
+        </article>
+
+        <article class="track rv" style="--d:220ms" tabindex="0">
+          <span class="track-idx">03</span>
+          <div class="track-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.9 15.5A2 2 0 0 0 8.5 14.1l-6.1-1.6a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0l1.5 6.1a2 2 0 0 0 1.5 1.5l6.1 1.5a.5.5 0 0 1 0 1l-6.1 1.5a2 2 0 0 0-1.5 1.5l-1.5 6.1a.5.5 0 0 1-1 0z"/>
+            </svg>
+          </div>
+          <h3>Open Innovation</h3>
+          <p>Innovate without boundaries. No category, no permission, no ceiling. If it's on-chain and it's audacious, it belongs here.</p>
+        </article>
+      </div>
+
+      <p class="tracks-note rv">Full track briefs, prize pool and judging criteria drop with registrations.</p>
+    </div>
+  </section>
+
+  <!-- ═══ SPONSORS ═══ -->
+  <section id="sponsors">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="sec-tag">Backed by the best</span>
+        <h2 class="sec-title">PAST <em>SPONSORS</em></h2>
+        <p class="sec-sub">The names that powered DeFy'26 and made the last one impossible to ignore.</p>
+      </div>
+    </div>
+
+    <div class="marquee rv" aria-hidden="true">
+      <div class="marquee-track" id="mq-a"></div>
+      <div class="marquee-track" id="mq-b"></div>
+    </div>
+
+    <div class="marquee rv" aria-hidden="true">
+      <div class="marquee-track" id="mq-c"></div>
+      <div class="marquee-track" id="mq-d"></div>
+    </div>
+
+    <div class="wrap">
+      <div class="sponsor-grid rv" id="sponsor-grid"></div>
+
+      <div class="powered rv">
+        <span class="powered-lbl">Powered by</span>
+        <img src="assets/powered-by/devfolio-white.png" alt="Devfolio" loading="lazy" />
+        <img src="assets/powered-by/ethindia-light.png" alt="ETHIndia" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="wrap">
+      <p class="f-mark">DEFY'27</p>
+      <p class="f-line">Innovate. Code. Collaborate. Something big is loading at VIT Chennai.</p>
+
+      <div class="socials">
+        <a href="https://www.linkedin.com/company/daovitcc/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM2 21h6V9H2v12zM10 21h6v-6.5c0-1.7.3-3.5 2.5-3.5 2.1 0 2.1 2 2.1 3.6V21h6v-7.6c0-4.6-1-6.9-4.8-6.9-2.3 0-3.7 1.3-4.3 2.4h-.1V9H10v12z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/daovitcc/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://x.com/daovitcc" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L22.8 22h-6.4l-5-6.6L5.6 22H2.5l7.1-8.1L1.6 2h6.5l4.7 6.2L18.9 2zm-1.1 18h1.7L7.4 3.7H5.6L17.8 20z"/></svg>
+        </a>
+      </div>
+
+      <p class="copy">© 2026 <b>DEFY'27</b> · The DAO Community · All rights reserved</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ═══════════════════════════════════════════════════════════
+     1 · SPONSORS - single source of truth
+     See DEFY27-BUILD-SPEC.md §6. Logos live in assets/.
+     ═══════════════════════════════════════════════════════════ */
+  const SPONSORS = [
+    { name: 'ZKWallet',    logo: 'assets/sponsors-previous/zkwalletlogo.png',   href: 'https://zkinnovations.com' },
+    { name: 'Gizmolab',    logo: 'assets/sponsors-previous/gizmolablogo.png',   href: 'https://www.gizmolab.io' },
+    // grid:false → shows in the sliding marquee, kept out of the static grid
+    { name: 'MTutor',      logo: 'assets/sponsors-previous/mtutorlogo.png',     href: 'https://www.m-tutor.com/', grid: false },
+    { name: 'MOI Technology', logo: 'assets/sponsors-previous/moilogo.png',     href: 'https://moi.technology/' },
+    { name: 'Krypcore',    logo: 'assets/sponsors-previous/krypcorelogo.png',   href: 'https://krypcore.com' },
+    { name: 'Qoneqt',      logo: 'assets/sponsors-previous/qoneqtlogo.png',     href: 'https://qoneqt.com' },
+    { name: 'QuickNode',   logo: 'assets/sponsors-previous/quicknodelogo.png',  href: 'https://www.quicknode.com/' },
+    { name: 'QuillAudits', logo: 'assets/sponsors-previous/quilauditslogo.png', href: 'https://www.quillaudits.com/smart-contract-audit' },
+  ];
+
+  const COMMUNITY = [
+    { name: 'Odisha DAO',                logo: 'assets/sponsors-community/odisha-dao.png' },
+    { name: 'The Phoenix Guild Chennai', logo: 'assets/sponsors-community/phoenix-guild-chennai.png' },
+    { name: 'Spider NITT',               logo: 'assets/sponsors-community/spider-nitt.png' },
+  ];
+
+  const logoEl = (s) => {
+    const d = document.createElement('div');
+    d.className = 'logo';
+    const img = document.createElement('img');
+    img.src = s.logo;
+    img.alt = s.name;
+    img.loading = 'lazy';
+    d.appendChild(img);
+    return d;
+  };
+
+  // Marquee rows need their content duplicated so the -100% slide loops seamlessly.
+  const fill = (id, list) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    list.forEach((s) => el.appendChild(logoEl(s)));
+  };
+  fill('mq-a', SPONSORS);
+  fill('mq-b', SPONSORS);
+  // second row: community partners, padded with sponsors so short lists still span the width
+  const row2 = COMMUNITY.concat(SPONSORS.slice(0, 5));
+  fill('mq-c', row2);
+  fill('mq-d', row2);
+
+  // the clickable grid
+  const grid = document.getElementById('sponsor-grid');
+  if (grid) {
+    SPONSORS.filter((s) => s.grid !== false).forEach((s) => {
+      const a = document.createElement('a');
+      a.className = 'sponsor-cell';
+      a.href = s.href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.setAttribute('aria-label', s.name);
+      const img = document.createElement('img');
+      img.src = s.logo;
+      img.alt = s.name;
+      img.loading = 'lazy';
+      const nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = s.name;
+      a.append(img, nm);
+      grid.appendChild(a);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     2 · COUNTDOWN - target pinned to IST, not local time
+     ═══════════════════════════════════════════════════════════ */
+  const TARGET = new Date('2027-01-08T09:00:00+05:30').getTime();
+  const cells = {};
+  document.querySelectorAll('.cd-num').forEach((n) => { cells[n.dataset.u] = n; });
+  const prev = {};
+
+  const pad = (n, w = 2) => String(n).padStart(w, '0');
+
+  function setCell(k, val) {
+    const el = cells[k];
+    if (!el || prev[k] === val) return;
+    prev[k] = val;
+    el.textContent = val;
+    if (reduce) return;
+    el.classList.remove('tick');
+    void el.offsetWidth;        // force reflow so the animation restarts
+    el.classList.add('tick');
+  }
+
+  function tickClock() {
+    // always derive from the absolute target - a backgrounded tab must not drift
+    const left = TARGET - Date.now();
+
+    if (left <= 0) {
+      document.body.dataset.phase = 'live';
+      return false;
+    }
+
+    const s = Math.floor(left / 1000);
+    setCell('d', pad(Math.floor(s / 86400), 3));
+    setCell('h', pad(Math.floor(s / 3600) % 24));
+    setCell('m', pad(Math.floor(s / 60) % 60));
+    setCell('s', pad(s % 60));
+    return true;
+  }
+
+  if (tickClock()) {
+    const iv = setInterval(() => { if (!tickClock()) clearInterval(iv); }, 1000);
+    // resync immediately when the tab comes back into focus
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) tickClock(); });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     3 · SCROLL REVEAL
+     ═══════════════════════════════════════════════════════════ */
+  const revealables = document.querySelectorAll('.rv');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealables.forEach((el) => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    revealables.forEach((el) => io.observe(el));
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     4 · MOUSE SPOTLIGHT (pointer devices only)
+     ═══════════════════════════════════════════════════════════ */
+  if (!reduce && window.matchMedia('(hover: hover)').matches) {
+    const root = document.documentElement;
+    let qx = 0, qy = 0, queued = false;
+    window.addEventListener('pointermove', (e) => {
+      qx = e.clientX; qy = e.clientY;
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        root.style.setProperty('--mx', qx + 'px');
+        root.style.setProperty('--my', qy + 'px');
+        queued = false;
+      });
+    }, { passive: true });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     5 · NODE NETWORK - the blockchain-ish backdrop
+     ═══════════════════════════════════════════════════════════ */
+  const cv = document.getElementById('net');
+  const ctx = cv && cv.getContext('2d');
+  if (ctx) {
+    let W = 0, H = 0, dpr = 1, nodes = [], raf = null;
+    const LINK = 132;
+
+    function build() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = cv.clientWidth; H = cv.clientHeight;
+      cv.width = Math.round(W * dpr);
+      cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // scale node count to area, but keep it bounded on both ends
+      const n = Math.max(26, Math.min(92, Math.round((W * H) / 19000)));
+      nodes = Array.from({ length: n }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.26,
+        vy: (Math.random() - 0.5) * 0.26,
+        r: Math.random() * 1.5 + 0.7,
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > LINK * LINK) continue;
+          const t = 1 - Math.sqrt(d2) / LINK;
+          ctx.strokeStyle = 'rgba(57,255,20,' + (t * 0.3).toFixed(3) + ')';
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      ctx.shadowColor = '#39ff14';
+      ctx.shadowBlur = 7;
+      ctx.fillStyle = 'rgba(57,255,20,0.75)';
+      for (const p of nodes) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+    }
+
+    function loop() { draw(); raf = requestAnimationFrame(loop); }
+
+    build();
+    if (reduce) {
+      draw();                               // one static frame
+    } else {
+      loop();
+      // don't burn cycles on a hidden tab
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
+        else if (!raf) loop();
+      });
+    }
+
+    let rt;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => { build(); if (reduce) draw(); }, 180);
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

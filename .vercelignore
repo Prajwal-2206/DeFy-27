@@ -1,0 +1,13 @@
+# Internal docs. A static deploy serves every file in this directory, so
+# without this these would be publicly readable at e.g. /security.md
+security.md
+DEFY27-BUILD-SPEC.md
+*.md
+
+# local junk
+node_modules/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.log
